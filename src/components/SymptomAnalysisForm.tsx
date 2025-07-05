@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { handleSymptomAnalysis } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Lightbulb, Wrench, CheckCircle } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import type { SymptomAnalysisOutput } from '@/ai/flows/symptom-analysis';
+import { cn } from '@/lib/utils';
 
 const initialState = {
   status: 'idle' as const,
@@ -32,6 +33,7 @@ export function SymptomAnalysisForm() {
   const [state, formAction] = useFormState(handleSymptomAnalysis, initialState);
   const { toast } = useToast();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const [selectedDiagnosis, setSelectedDiagnosis] = useState<number | null>(null);
 
   useEffect(() => {
     if (state.status === 'error' && state.message) {
@@ -43,6 +45,7 @@ export function SymptomAnalysisForm() {
     }
     if (state.status === 'success') {
       resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setSelectedDiagnosis(null);
     }
   }, [state, toast]);
 
@@ -107,16 +110,23 @@ export function SymptomAnalysisForm() {
 
       {state.status === 'success' && state.data && (
         <div ref={resultsRef} className="p-6 mt-6 space-y-6 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg">
-           <Alert>
-             <CheckCircle className="h-4 w-4" />
+           <Alert className="bg-primary text-primary-foreground border-primary-foreground/20">
+             <CheckCircle className="h-4 w-4 text-primary-foreground" />
             <AlertTitle>Анализ завершен!</AlertTitle>
-            <AlertDescription>
-              Вот возможные проблемы, основанные на предоставленных вами симптомах.
+            <AlertDescription className="text-primary-foreground/90">
+              Выберите проблему, которую вы считаете наиболее близкой к вашей ситуации.
             </AlertDescription>
           </Alert>
 
           {state.data.diagnoses.map((d, index) => (
-            <Card key={index} className="bg-background/80 dark:bg-background/50">
+            <Card 
+              key={index}
+              onClick={() => setSelectedDiagnosis(index)}
+              className={cn(
+                "bg-background/80 dark:bg-background/50 cursor-pointer transition-all duration-200 hover:shadow-lg",
+                selectedDiagnosis === index && "ring-2 ring-offset-2 ring-offset-background ring-primary bg-primary/10"
+              )}
+            >
               <CardHeader className="flex flex-row items-start gap-4 space-y-0">
                   <span className="bg-primary/10 p-2 rounded-full">
                     <Wrench className="w-6 h-6 text-primary" />
