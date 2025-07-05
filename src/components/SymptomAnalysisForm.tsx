@@ -29,8 +29,9 @@ function SubmitButton() {
   );
 }
 
-function LoadingMessage({ make }: { make: string | null }) {
-  const { pending } = useFormStatus();
+function LoadingMessage() {
+  const { pending, data } = useFormStatus();
+  const make = data?.get('make') as string | null;
 
   if (!pending) {
     return null;
@@ -54,7 +55,6 @@ export function SymptomAnalysisForm() {
   const { toast } = useToast();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState<number | null>(null);
-  const [loadingMake, setLoadingMake] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.status === 'error' && state.message) {
@@ -70,19 +70,13 @@ export function SymptomAnalysisForm() {
     }
   }, [state, toast]);
 
-  const handleFormActionWrapper = (formData: FormData) => {
-    const make = formData.get("make") as string;
-    setLoadingMake(make);
-    return formAction(formData);
-  };
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Диагностика по симптомам</CardTitle>
         <CardDescription>Опишите симптомы вашего авто, и наш ИИ поставит вероятный диагноз.</CardDescription>
       </CardHeader>
-      <form action={handleFormActionWrapper}>
+      <form action={formAction}>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
@@ -124,7 +118,7 @@ export function SymptomAnalysisForm() {
             <div className="w-full flex justify-end">
                 <SubmitButton />
             </div>
-            <LoadingMessage make={loadingMake} />
+            <LoadingMessage />
         </CardFooter>
       </form>
 
