@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { handleSymptomAnalysis } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ function SubmitButton() {
 export function SymptomAnalysisForm() {
   const [state, formAction] = useFormState(handleSymptomAnalysis, initialState);
   const { toast } = useToast();
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (state.status === 'error' && state.message) {
@@ -39,6 +40,9 @@ export function SymptomAnalysisForm() {
         title: "Ошибка",
         description: state.message,
       });
+    }
+    if (state.status === 'success') {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [state, toast]);
 
@@ -102,7 +106,7 @@ export function SymptomAnalysisForm() {
       )}
 
       {state.status === 'success' && state.data && (
-        <div className="p-6 space-y-6">
+        <div ref={resultsRef} className="p-6 space-y-6">
            <Alert>
              <CheckCircle className="h-4 w-4" />
             <AlertTitle>Анализ завершен</AlertTitle>
@@ -132,6 +136,12 @@ export function SymptomAnalysisForm() {
               </CardContent>
             </Card>
           ))}
+          <div className="text-center mt-8 pt-6 border-t">
+            <p className="mb-4 text-muted-foreground">Не уверены, что делать дальше? Получите оценку стоимости ремонта у проверенных специалистов.</p>
+            <Button>
+              Отправить запрос на просчет ремонта
+            </Button>
+          </div>
         </div>
       )}
     </Card>
