@@ -57,11 +57,22 @@ export function MaintenanceAdvisorForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="make">Марка</Label>
-              <Input id="make" name="make" placeholder="например, Honda" required />
+              <Input id="make" name="make" placeholder="например, BMW" required list="makes-list" />
+              <datalist id="makes-list">
+                <option value="BMW" />
+                <option value="Mercedes-Benz" />
+                <option value="Audi" />
+                <option value="Toyota" />
+                <option value="Honda" />
+                <option value="Volkswagen" />
+                <option value="Lada" />
+                <option value="Kia" />
+                <option value="Hyundai" />
+              </datalist>
             </div>
             <div className="space-y-2">
               <Label htmlFor="model">Модель</Label>
-              <Input id="model" name="model" placeholder="например, Civic" required />
+              <Input id="model" name="model" placeholder="например, X5" required />
             </div>
           </div>
         </CardContent>
