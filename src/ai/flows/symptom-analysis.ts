@@ -1,29 +1,29 @@
 // Symptom Analysis Flow
 'use server';
 /**
- * @fileOverview Analyzes vehicle symptoms to provide potential diagnoses and causes.
+ * @fileOverview Анализирует симптомы автомобиля для предоставления возможных диагнозов и причин.
  *
- * - analyzeSymptoms - A function that analyzes vehicle symptoms.
- * - SymptomAnalysisInput - The input type for the analyzeSymptoms function.
- * - SymptomAnalysisOutput - The return type for the analyzeSymptoms function.
+ * - analyzeSymptoms - Функция, которая анализирует симптомы автомобиля.
+ * - SymptomAnalysisInput - Тип входных данных для функции analyzeSymptoms.
+ * - SymptomAnalysisOutput - Тип возвращаемого значения для функции analyzeSymptoms.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SymptomAnalysisInputSchema = z.object({
-  vehicleDetails: z.string().describe('The make, model, and year of the vehicle.'),
-  symptoms: z.string().describe('A detailed description of the vehicle symptoms.'),
+  vehicleDetails: z.string().describe('Марка, модель и год выпуска автомобиля.'),
+  symptoms: z.string().describe('Подробное описание симптомов автомобиля.'),
 });
 export type SymptomAnalysisInput = z.infer<typeof SymptomAnalysisInputSchema>;
 
 const SymptomAnalysisOutputSchema = z.object({
   diagnoses: z.array(
     z.object({
-      diagnosis: z.string().describe('A potential diagnosis for the vehicle issue.'),
-      likelyCauses: z.string().describe('The likely causes for the diagnosis.'),
+      diagnosis: z.string().describe('Возможный диагноз проблемы с автомобилем.'),
+      likelyCauses: z.string().describe('Вероятные причины для данного диагноза.'),
     })
-  ).describe('A list of potential diagnoses and their likely causes.'),
+  ).describe('Список возможных диагнозов и их вероятных причин.'),
 });
 export type SymptomAnalysisOutput = z.infer<typeof SymptomAnalysisOutputSchema>;
 
@@ -35,12 +35,12 @@ const prompt = ai.definePrompt({
   name: 'symptomAnalysisPrompt',
   input: {schema: SymptomAnalysisInputSchema},
   output: {schema: SymptomAnalysisOutputSchema},
-  prompt: `You are an experienced mechanic. A user will describe their car issues, and you will provide a list of potential diagnoses with likely causes.
+  prompt: `Вы — опытный механик. Пользователь опишет проблемы со своим автомобилем, а вы предоставите список возможных диагнозов с вероятными причинами. Ответ должен быть на русском языке.
 
-Vehicle Details: {{{vehicleDetails}}}
-Symptoms: {{{symptoms}}}
+Данные автомобиля: {{{vehicleDetails}}}
+Симптомы: {{{symptoms}}}
 
-Provide your answer in JSON format. Make sure the diagnoses and likelyCauses fields are populated with valid and helpful descriptions.
+Предоставьте свой ответ в формате JSON. Убедитесь, что поля diagnoses и likelyCauses заполнены действительными и полезными описаниями на русском языке.
 `, // Ensure the response is valid JSON
 });
 

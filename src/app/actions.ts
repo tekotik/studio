@@ -5,13 +5,13 @@ import { generateMaintenanceSchedule, MaintenanceScheduleInput, MaintenanceSched
 import { z } from "zod";
 
 const symptomSchema = z.object({
-  vehicleDetails: z.string().min(5, "Please provide more vehicle details."),
-  symptoms: z.string().min(10, "Please describe the symptoms in more detail."),
+  vehicleDetails: z.string().min(5, "Пожалуйста, предоставьте больше данных об автомобиле."),
+  symptoms: z.string().min(10, "Пожалуйста, опишите симптомы более подробно."),
 });
 
 const maintenanceSchema = z.object({
-  make: z.string().min(2, "Please enter a valid make."),
-  model: z.string().min(1, "Please enter a valid model."),
+  make: z.string().min(2, "Пожалуйста, введите действительную марку."),
+  model: z.string().min(1, "Пожалуйста, введите действительную модель."),
 });
 
 type State<T> = {
@@ -41,12 +41,12 @@ export async function handleSymptomAnalysis(
   try {
     const result = await analyzeSymptoms(validation.data as SymptomAnalysisInput);
     if (!result || !result.diagnoses || result.diagnoses.length === 0) {
-      return { status: "error", message: "AI could not generate a diagnosis. Please try being more specific." };
+      return { status: "error", message: "ИИ не смог поставить диагноз. Пожалуйста, попробуйте быть более конкретным." };
     }
-    return { status: "success", message: "Analysis complete.", data: result };
+    return { status: "success", message: "Анализ завершен.", data: result };
   } catch (error) {
     console.error(error);
-    return { status: "error", message: "An unexpected error occurred. Please try again." };
+    return { status: "error", message: "Произошла непредвиденная ошибка. Пожалуйста, попробуйте еще раз." };
   }
 }
 
@@ -72,11 +72,11 @@ export async function handleMaintenanceSchedule(
   try {
     const result = await generateMaintenanceSchedule(validation.data as MaintenanceScheduleInput);
     if (!result || !result.schedule) {
-      return { status: "error", message: "AI could not generate a schedule. Please check the vehicle details." };
+      return { status: "error", message: "ИИ не смог создать график. Пожалуйста, проверьте данные автомобиля." };
     }
-    return { status: "success", message: "Schedule generated.", data: result };
+    return { status: "success", message: "График создан.", data: result };
   } catch (error) {
     console.error(error);
-    return { status: "error", message: "An unexpected error occurred. Please try again." };
+    return { status: "error", message: "Произошла непредвиденная ошибка. Пожалуйста, попробуйте еще раз." };
   }
 }

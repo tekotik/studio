@@ -23,7 +23,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending} className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90">
-      {pending ? 'Analyzing...' : 'Analyze Symptoms'}
+      {pending ? 'Анализ...' : 'Анализировать симптомы'}
     </Button>
   );
 }
@@ -36,7 +36,7 @@ export function SymptomAnalysisForm() {
     if (state.status === 'error' && state.message) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Ошибка",
         description: state.message,
       });
     }
@@ -46,21 +46,21 @@ export function SymptomAnalysisForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Symptom Checker</CardTitle>
-        <CardDescription>Describe your car's issues, and our AI will suggest potential diagnoses.</CardDescription>
+        <CardTitle>Проверка симптомов</CardTitle>
+        <CardDescription>Опишите проблемы вашего автомобиля, и наш ИИ предложит возможные диагнозы.</CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="vehicleDetails">Vehicle Details</Label>
-            <Input id="vehicleDetails" name="vehicleDetails" placeholder="e.g., 2018 Toyota Camry" required />
+            <Label htmlFor="vehicleDetails">Данные автомобиля</Label>
+            <Input id="vehicleDetails" name="vehicleDetails" placeholder="например, 2018 Toyota Camry" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="symptoms">Symptoms</Label>
+            <Label htmlFor="symptoms">Симптомы</Label>
             <Textarea
               id="symptoms"
               name="symptoms"
-              placeholder="e.g., Loud squealing noise when braking, car pulls to the left."
+              placeholder="например, Громкий визг при торможении, машину уводит влево."
               required
               rows={4}
             />
@@ -75,7 +75,7 @@ export function SymptomAnalysisForm() {
          <div className="p-6">
           <div className="flex items-center space-x-2 text-muted-foreground">
             <div className="w-4 h-4 rounded-full bg-primary animate-pulse"></div>
-            <span>Analyzing symptoms, please wait...</span>
+            <span>Анализируем симптомы, пожалуйста, подождите...</span>
           </div>
          </div>
       )}
@@ -84,9 +84,9 @@ export function SymptomAnalysisForm() {
         <div className="p-6 space-y-6">
            <Alert>
              <CheckCircle className="h-4 w-4" />
-            <AlertTitle>Analysis Complete</AlertTitle>
+            <AlertTitle>Анализ завершен</AlertTitle>
             <AlertDescription>
-              Here are the potential issues based on the symptoms you provided.
+              Вот возможные проблемы, основанные на предоставленных вами симптомах.
             </AlertDescription>
           </Alert>
 
@@ -104,7 +104,7 @@ export function SymptomAnalysisForm() {
                  <div className="flex items-start gap-3 mt-4">
                    <Lightbulb className="w-5 h-5 mt-1 text-yellow-500 flex-shrink-0" />
                    <div>
-                    <h4 className="font-semibold">Likely Causes</h4>
+                    <h4 className="font-semibold">Вероятные причины</h4>
                     <p className="text-muted-foreground">{d.likelyCauses}</p>
                    </div>
                  </div>

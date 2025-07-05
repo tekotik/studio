@@ -22,7 +22,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending} className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90">
-      {pending ? 'Generating...' : 'Get Schedule'}
+      {pending ? 'Генерация...' : 'Получить график'}
     </Button>
   );
 }
@@ -35,7 +35,7 @@ export function MaintenanceAdvisorForm() {
     if (state.status === 'error' && state.message) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Ошибка",
         description: state.message,
       });
     }
@@ -49,19 +49,19 @@ export function MaintenanceAdvisorForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Maintenance Advisor</CardTitle>
-        <CardDescription>Enter your vehicle's make and model for a personalized maintenance schedule.</CardDescription>
+        <CardTitle>Советник по техобслуживанию</CardTitle>
+        <CardDescription>Введите марку и модель вашего автомобиля для получения персонального графика технического обслуживания.</CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="make">Make</Label>
-              <Input id="make" name="make" placeholder="e.g., Honda" required />
+              <Label htmlFor="make">Марка</Label>
+              <Input id="make" name="make" placeholder="например, Honda" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="model">Model</Label>
-              <Input id="model" name="model" placeholder="e.g., Civic" required />
+              <Label htmlFor="model">Модель</Label>
+              <Input id="model" name="model" placeholder="например, Civic" required />
             </div>
           </div>
         </CardContent>
@@ -74,7 +74,7 @@ export function MaintenanceAdvisorForm() {
          <div className="p-6">
           <div className="flex items-center space-x-2 text-muted-foreground">
             <div className="w-4 h-4 rounded-full bg-primary animate-pulse"></div>
-            <span>Generating schedule, please wait...</span>
+            <span>Идет создание графика, пожалуйста, подождите...</span>
           </div>
          </div>
       )}
@@ -83,9 +83,9 @@ export function MaintenanceAdvisorForm() {
         <div className="p-6 space-y-4">
           <Alert>
              <CheckCircle className="h-4 w-4" />
-            <AlertTitle>Schedule Generated</AlertTitle>
+            <AlertTitle>График создан</AlertTitle>
             <AlertDescription>
-              Below is the recommended maintenance schedule for your vehicle.
+              Ниже представлен рекомендуемый график технического обслуживания для вашего автомобиля.
             </AlertDescription>
           </Alert>
           <div className="space-y-2 rounded-md border p-4 bg-background/50 text-sm">

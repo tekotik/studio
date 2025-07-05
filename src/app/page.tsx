@@ -13,10 +13,10 @@ export default function Home() {
       <main className="flex-1 container mx-auto p-4 md:p-8">
         <section className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 font-headline">
-            Your Personal AI Car Mechanic
+            Ваш личный AI автомеханик
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Get instant vehicle diagnostics and maintenance schedules. Just describe the issue or enter your vehicle's model.
+            Получите мгновенную диагностику автомобиля и графики технического обслуживания. Просто опишите проблему или введите модель вашего автомобиля.
           </p>
         </section>
         
@@ -24,11 +24,11 @@ export default function Home() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="symptom-analysis">
               <Car className="mr-2" />
-              Symptom Analysis
+              Анализ симптомов
             </TabsTrigger>
             <TabsTrigger value="maintenance-advisor">
               <Wrench className="mr-2" />
-              Maintenance Advisor
+              Советник по техобслуживанию
             </TabsTrigger>
           </TabsList>
           <TabsContent value="symptom-analysis">
@@ -44,7 +44,7 @@ export default function Home() {
 
       </main>
       <footer className="py-6 text-center text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} AskAI Doctor. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} AI Доктор. Все права защищены.</p>
       </footer>
     </div>
   );
