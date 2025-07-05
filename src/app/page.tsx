@@ -13,7 +13,7 @@ export default function Home() {
       <main className="flex-1 container mx-auto p-4 md:p-8">
         <section className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 font-headline">
-            Ваш личный AI автомеханик
+            Ваш личный онлайн автомеханик
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
             Получите мгновенную диагностику автомобиля и графики технического обслуживания. Просто опишите проблему или введите модель вашего автомобиля.
