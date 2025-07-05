@@ -49,8 +49,8 @@ export function MaintenanceAdvisorForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Советник по техобслуживанию</CardTitle>
-        <CardDescription>Введите марку и модель вашего автомобиля для получения персонального графика технического обслуживания.</CardDescription>
+        <CardTitle>Советник</CardTitle>
+        <CardDescription>Введите марку и модель для получения графика ТО.</CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">

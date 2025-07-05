@@ -51,7 +51,7 @@ export function SymptomAnalysisForm() {
     <Card>
       <CardHeader>
         <CardTitle>Проверка симптомов</CardTitle>
-        <CardDescription>Опишите проблемы вашего автомобиля, и наш ИИ предложит возможные диагнозы.</CardDescription>
+        <CardDescription>Опишите симптомы, и наш ИИ предложит возможные диагнозы.</CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">

@@ -12,10 +12,10 @@ export default function Home() {
       <Header />
       <main className="flex-1 container mx-auto p-4 md:p-8">
         <section className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 font-headline">
+          <h1 className="text-3xl md:text-4xl font-bold text-primary mb-4 font-headline">
             Ваш личный онлайн автомеханик
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
             Получите мгновенную диагностику автомобиля и графики технического обслуживания. Просто опишите проблему или введите модель вашего автомобиля.
           </p>
         </section>
@@ -28,7 +28,7 @@ export default function Home() {
             </TabsTrigger>
             <TabsTrigger value="maintenance-advisor">
               <Wrench className="mr-2" />
-              Советник по техобслуживанию
+              Советник
             </TabsTrigger>
           </TabsList>
           <TabsContent value="symptom-analysis">
