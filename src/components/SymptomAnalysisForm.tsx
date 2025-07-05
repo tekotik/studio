@@ -29,11 +29,32 @@ function SubmitButton() {
   );
 }
 
+function LoadingMessage({ make }: { make: string | null }) {
+  const { pending } = useFormStatus();
+
+  if (!pending) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center space-x-2 text-muted-foreground">
+      <div className="w-4 h-4 rounded-full bg-primary animate-pulse"></div>
+      <span>
+        {make
+          ? `Идет аналитика вашего ${make}...`
+          : 'Анализируем симптомы, пожалуйста, подождите...'}
+      </span>
+    </div>
+  );
+}
+
+
 export function SymptomAnalysisForm() {
   const [state, formAction] = useFormState(handleSymptomAnalysis, initialState);
   const { toast } = useToast();
   const resultsRef = useRef<HTMLDivElement>(null);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState<number | null>(null);
+  const [loadingMake, setLoadingMake] = useState<string | null>(null);
 
   useEffect(() => {
     if (state.status === 'error' && state.message) {
@@ -49,6 +70,11 @@ export function SymptomAnalysisForm() {
     }
   }, [state, toast]);
 
+  const handleFormActionWrapper = (formData: FormData) => {
+    const make = formData.get("make") as string;
+    setLoadingMake(make);
+    return formAction(formData);
+  };
 
   return (
     <Card>
@@ -56,7 +82,7 @@ export function SymptomAnalysisForm() {
         <CardTitle>Диагностика по симптомам</CardTitle>
         <CardDescription>Опишите симптомы вашего авто, и наш ИИ поставит вероятный диагноз.</CardDescription>
       </CardHeader>
-      <form action={formAction}>
+      <form action={handleFormActionWrapper}>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
@@ -94,19 +120,13 @@ export function SymptomAnalysisForm() {
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <SubmitButton />
+        <CardFooter className="flex flex-col items-start gap-4">
+            <div className="w-full flex justify-end">
+                <SubmitButton />
+            </div>
+            <LoadingMessage make={loadingMake} />
         </CardFooter>
       </form>
-
-      {state.status === 'loading' && (
-         <div className="p-6">
-          <div className="flex items-center space-x-2 text-muted-foreground">
-            <div className="w-4 h-4 rounded-full bg-primary animate-pulse"></div>
-            <span>Анализируем симптомы, пожалуйста, подождите...</span>
-          </div>
-         </div>
-      )}
 
       {state.status === 'success' && state.data && (
         <div ref={resultsRef} className="p-6 mt-6 space-y-6 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg">
