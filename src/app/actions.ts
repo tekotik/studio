@@ -5,7 +5,11 @@ import { generateMaintenanceSchedule, MaintenanceScheduleInput, MaintenanceSched
 import { z } from "zod";
 
 const symptomSchema = z.object({
-  vehicleDetails: z.string().min(5, "Пожалуйста, предоставьте больше данных об автомобиле."),
+  make: z.string().min(2, "Пожалуйста, введите действительную марку."),
+  model: z.string().min(1, "Пожалуйста, введите действительную модель."),
+  year: z.string().refine((year) => !isNaN(parseInt(year)) && parseInt(year) > 1900 && parseInt(year) <= new Date().getFullYear() + 1, {
+    message: "Пожалуйста, введите действительный год.",
+  }),
   symptoms: z.string().min(10, "Пожалуйста, опишите симптомы более подробно."),
 });
 
@@ -25,7 +29,9 @@ export async function handleSymptomAnalysis(
   formData: FormData
 ): Promise<State<SymptomAnalysisOutput>> {
   const rawData = {
-    vehicleDetails: formData.get("vehicleDetails"),
+    make: formData.get("make"),
+    model: formData.get("model"),
+    year: formData.get("year"),
     symptoms: formData.get("symptoms"),
   };
 
@@ -38,8 +44,13 @@ export async function handleSymptomAnalysis(
     };
   }
   
+  const analysisInput: SymptomAnalysisInput = {
+    vehicleDetails: `${validation.data.make} ${validation.data.model} ${validation.data.year}`,
+    symptoms: validation.data.symptoms,
+  };
+
   try {
-    const result = await analyzeSymptoms(validation.data as SymptomAnalysisInput);
+    const result = await analyzeSymptoms(analysisInput);
     if (!result || !result.diagnoses || result.diagnoses.length === 0) {
       return { status: "error", message: "ИИ не смог поставить диагноз. Пожалуйста, попробуйте быть более конкретным." };
     }

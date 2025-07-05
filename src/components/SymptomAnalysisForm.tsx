@@ -51,9 +51,30 @@ export function SymptomAnalysisForm() {
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="vehicleDetails">Данные автомобиля</Label>
-            <Input id="vehicleDetails" name="vehicleDetails" placeholder="например, 2018 Toyota Camry" required />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="make">Марка</Label>
+              <Input id="make" name="make" placeholder="например, BMW" required list="makes-list-symptoms" />
+              <datalist id="makes-list-symptoms">
+                <option value="BMW" />
+                <option value="Mercedes-Benz" />
+                <option value="Audi" />
+                <option value="Toyota" />
+                <option value="Honda" />
+                <option value="Volkswagen" />
+                <option value="Lada" />
+                <option value="Kia" />
+                <option value="Hyundai" />
+              </datalist>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="model">Модель</Label>
+              <Input id="model" name="model" placeholder="например, X5" required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="year">Год</Label>
+              <Input id="year" name="year" type="number" placeholder="например, 2018" required min="1900" max={new Date().getFullYear() + 1} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="symptoms">Симптомы</Label>
