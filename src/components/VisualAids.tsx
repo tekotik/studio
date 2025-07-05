@@ -23,7 +23,7 @@ const aids = [
 export function VisualAids() {
   return (
     <section className="my-16">
-      <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 font-headline text-primary">Руководства по визуальному осмотру</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 font-headline text-primary">Быстрый визуальный осмотр</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {aids.map((aid) => (
           <Card key={aid.title} className="hover:shadow-lg transition-shadow duration-300">

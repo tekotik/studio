@@ -22,7 +22,7 @@ const initialState = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90">
+    <Button type="submit" disabled={pending} className="w-full sm:w-auto">
       {pending ? 'Анализ...' : 'Анализировать симптомы'}
     </Button>
   );
@@ -50,8 +50,8 @@ export function SymptomAnalysisForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Проверка симптомов</CardTitle>
-        <CardDescription>Опишите симптомы, и наш ИИ предложит возможные диагнозы.</CardDescription>
+        <CardTitle>Диагностика по симптомам</CardTitle>
+        <CardDescription>Опишите симптомы вашего авто, и наш ИИ поставит вероятный диагноз.</CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
@@ -106,17 +106,17 @@ export function SymptomAnalysisForm() {
       )}
 
       {state.status === 'success' && state.data && (
-        <div ref={resultsRef} className="p-6 space-y-6">
+        <div ref={resultsRef} className="p-6 mt-6 space-y-6 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg">
            <Alert>
              <CheckCircle className="h-4 w-4" />
-            <AlertTitle>Анализ завершен</AlertTitle>
+            <AlertTitle>Анализ завершен!</AlertTitle>
             <AlertDescription>
               Вот возможные проблемы, основанные на предоставленных вами симптомах.
             </AlertDescription>
           </Alert>
 
           {state.data.diagnoses.map((d, index) => (
-            <Card key={index} className="bg-background">
+            <Card key={index} className="bg-background/80 dark:bg-background/50">
               <CardHeader className="flex flex-row items-start gap-4 space-y-0">
                   <span className="bg-primary/10 p-2 rounded-full">
                     <Wrench className="w-6 h-6 text-primary" />

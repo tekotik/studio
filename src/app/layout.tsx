@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'AI Доктор',
-  description: 'Диагностика автомобиля и графики технического обслуживания с помощью ИИ.',
+  title: 'POCHINI',
+  description: 'POCHINI: Ваш умный автомеханик. Диагностика автомобиля и графики технического обслуживания с помощью ИИ.',
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet"></link>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"></link>
       </head>
       <body className="font-body antialiased bg-background text-foreground h-full">
         {children}

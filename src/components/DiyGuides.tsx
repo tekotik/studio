@@ -28,10 +28,10 @@ const guides = [
 export function DiyGuides() {
   return (
     <section className="my-16">
-      <h2 className="text-3xl font-bold text-center mb-8 font-headline text-primary">Руководства и статьи «Сделай сам»</h2>
+      <h2 className="text-3xl font-bold text-center mb-8 font-headline text-primary">Полезные руководства</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {guides.map((guide) => (
-          <Card key={guide.title} className="flex flex-col">
+          <Card key={guide.title} className="flex flex-col hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-center gap-3">
                  <BookOpen className="w-6 h-6 text-primary" />

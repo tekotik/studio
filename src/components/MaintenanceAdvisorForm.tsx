@@ -21,7 +21,7 @@ const initialState = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90">
+    <Button type="submit" disabled={pending} className="w-full sm:w-auto">
       {pending ? 'Генерация...' : 'Получить график'}
     </Button>
   );
@@ -49,15 +49,15 @@ export function MaintenanceAdvisorForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Советник</CardTitle>
-        <CardDescription>Введите марку и модель для получения графика ТО.</CardDescription>
+        <CardTitle>Советник по ТО</CardTitle>
+        <CardDescription>Получите персональный график технического обслуживания для вашего автомобиля.</CardDescription>
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="make">Марка</Label>
-              <Input id="make" name="make" placeholder="например, BMW" required list="makes-list" />
+              <Label htmlFor="make-maintenance">Марка</Label>
+              <Input id="make-maintenance" name="make" placeholder="например, BMW" required list="makes-list" />
               <datalist id="makes-list">
                 <option value="BMW" />
                 <option value="Mercedes-Benz" />
@@ -71,8 +71,8 @@ export function MaintenanceAdvisorForm() {
               </datalist>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="model">Модель</Label>
-              <Input id="model" name="model" placeholder="например, X5" required />
+              <Label htmlFor="model-maintenance">Модель</Label>
+              <Input id="model-maintenance" name="model" placeholder="например, X5" required />
             </div>
           </div>
         </CardContent>
@@ -91,10 +91,10 @@ export function MaintenanceAdvisorForm() {
       )}
 
       {state.status === 'success' && formattedSchedule && (
-        <div className="p-6 space-y-4">
+        <div className="p-6 mt-6 space-y-4 bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-lg">
           <Alert>
              <CheckCircle className="h-4 w-4" />
-            <AlertTitle>График создан</AlertTitle>
+            <AlertTitle>Ваш график готов!</AlertTitle>
             <AlertDescription>
               Ниже представлен рекомендуемый график технического обслуживания для вашего автомобиля.
             </AlertDescription>
@@ -108,7 +108,7 @@ export function MaintenanceAdvisorForm() {
                   return <h4 key={index} className="font-semibold text-md mt-3 mb-1">{line.replace(/\*\*/g, '')}</h4>;
               }
               if (line.startsWith('* ')) {
-                  return <p key={index} className="flex items-start gap-2 pl-4"><span className="text-accent-foreground font-semibold">✓</span><span>{line.substring(2)}</span></p>;
+                  return <p key={index} className="flex items-start gap-2 pl-4"><span className="text-primary font-semibold">✓</span><span>{line.substring(2)}</span></p>;
               }
               return <p key={index} className="pl-4">{line}</p>;
             })}
