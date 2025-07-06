@@ -8,9 +8,9 @@ export function AdditionalServices() {
       <h2 className="text-3xl font-bold text-center mb-8 font-headline text-primary">Дополнительные услуги</h2>
       <Card className="overflow-hidden bg-primary/5 dark:bg-primary/10 border-primary/20">
         <CardHeader>
-          <CardTitle className="text-2xl">Антикоррозийная обработка</CardTitle>
+          <CardTitle className="text-2xl">Профессиональный антикор: комплексная защита</CardTitle>
           <CardDescription>
-            Защитите кузов вашего автомобиля от ржавчины и коррозии с помощью наших профессиональных услуг. Мы используем современные материалы, которые обеспечивают долговечную защиту даже в самых суровых условиях.
+            Сохраните кузов вашего автомобиля от ржавчины, вызванной дорожными реагентами и влажным климатом. Мы предлагаем полную обработку с использованием проверенных материалов для максимальной защиты.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -24,8 +24,8 @@ export function AdditionalServices() {
                 className="rounded-lg object-cover mb-4 shadow-md"
                 data-ai-hint="car underbody"
               />
-              <h3 className="font-semibold mb-1">Обработка днища и арок</h3>
-              <p className="text-sm text-muted-foreground">Нанесение защитного состава на самые уязвимые части автомобиля.</p>
+              <h3 className="font-semibold mb-1">Днище и колесные арки</h3>
+              <p className="text-sm text-muted-foreground">Мощный барьер против абразивного износа и коррозии. Наносим прочные составы, защищающие металл от камней, песка и влаги.</p>
             </div>
             <div className="flex flex-col items-center text-center p-4 rounded-lg bg-card/50">
                <Image
@@ -36,24 +36,24 @@ export function AdditionalServices() {
                 className="rounded-lg object-cover mb-4 shadow-md"
                 data-ai-hint="car rust"
               />
-              <h3 className="font-semibold mb-1">Защита скрытых полостей</h3>
-              <p className="text-sm text-muted-foreground">Обработка порогов, дверей и лонжеронов для предотвращения внутренней коррозии.</p>
+              <h3 className="font-semibold mb-1">Скрытые полости</h3>
+              <p className="text-sm text-muted-foreground">Обрабатываем пороги, двери и лонжероны специальными проникающими составами, которые останавливают ржавчину изнутри.</p>
             </div>
              <div className="flex flex-col items-center text-center p-4 rounded-lg bg-card/50">
                <Image
                 src="https://placehold.co/400x300.png"
-                alt="Автомобиль после обработки"
+                alt="Сварные швы автомобиля"
                 width={400}
                 height={300}
                 className="rounded-lg object-cover mb-4 shadow-md"
-                data-ai-hint="car detailing"
+                data-ai-hint="car detailing suspension"
               />
-              <h3 className="font-semibold mb-1">Долговечный результат</h3>
-              <p className="text-sm text-muted-foreground">Гарантия защиты от коррозии на долгие годы.</p>
+              <h3 className="font-semibold mb-1">Подвеска и сварные швы</h3>
+              <p className="text-sm text-muted-foreground">Уделяем внимание каждому элементу, защищая сварные соединения и детали подвески от преждевременного разрушения.</p>
             </div>
           </div>
           <div className="text-center">
-            <Button>Узнать стоимость обработки</Button>
+            <Button>Рассчитать стоимость и записаться</Button>
           </div>
         </CardContent>
       </Card>
