@@ -146,7 +146,7 @@ export async function handleChatMessage(
     }
 
     await addNews({
-        title: `Вопрос из чата: "${message.length > 40 ? message.substring(0, 40) + '...' : message}"`,
+        title: message,
         question: message,
         answer: result.response,
         source: 'Чат-ассистент'
