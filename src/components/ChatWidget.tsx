@@ -113,21 +113,18 @@ export function ChatWidget() {
     setChatPosition(null); 
   };
 
-  const handleCloseChat = () => {
+  const handleCloseChat = (e: ReactMouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     setIsOpen(false);
   }
 
   useEffect(() => {
-    if (isOpen && !chatPosition) {
-        setTimeout(() => {
-            if (chatWindowRef.current) {
-                const chatWidth = chatWindowRef.current.offsetWidth;
-                const chatHeight = chatWindowRef.current.offsetHeight;
-                const x = Math.max(0, (window.innerWidth - chatWidth) / 2);
-                const y = Math.max(20, (window.innerHeight - chatHeight) / 2);
-                setChatPosition({ x, y });
-            }
-        }, 0);
+    if (isOpen && !chatPosition && chatWindowRef.current) {
+        const chatWidth = chatWindowRef.current.offsetWidth;
+        const chatHeight = chatWindowRef.current.offsetHeight;
+        const x = Math.max(0, (window.innerWidth - chatWidth) / 2);
+        const y = Math.max(20, (window.innerHeight - chatHeight) / 2);
+        setChatPosition({ x, y });
     }
   }, [isOpen, chatPosition]);
 
@@ -138,7 +135,12 @@ export function ChatWidget() {
   };
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLElement>, element: 'button' | 'chat') => {
-    if (e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
+    // Allow clicks on buttons inside the draggable area
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button, input')) {
+      if (element === 'chat' && !(e.target as HTMLElement).closest('[data-drag-handle]')) {
+        return;
+      }
+    }
     
     const targetElement = e.currentTarget;
     const rect = targetElement.getBoundingClientRect();
@@ -274,9 +276,10 @@ export function ChatWidget() {
             } : {}}
         >
            <Card className="w-full h-full flex flex-col shadow-none border-none overflow-hidden rounded-2xl">
-            <form action={formAction} ref={formRef} className="flex flex-col flex-1 h-full">
+            <form action={formAction} ref={formRef} className="flex flex-col flex-1 h-full min-h-0">
               <CardHeader
                 onMouseDown={(e) => handleMouseDown(e, 'chat')}
+                data-drag-handle
                 className={cn(
                   "flex flex-row items-center justify-between p-4 border-b",
                   "cursor-grab active:cursor-grabbing"
@@ -293,7 +296,7 @@ export function ChatWidget() {
                     <span className="sr-only">Закрыть чат</span>
                  </Button>
               </CardHeader>
-              <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
+              <CardContent className="flex-1 overflow-hidden p-0 flex flex-col min-h-0">
                 <ScrollArea className="h-full px-4 pt-4">
                    {state.messages.length === 0 && (
                       <div className="space-y-6 pb-4">
@@ -315,9 +318,8 @@ export function ChatWidget() {
                                         key={i}
                                         type="button"
                                         variant="outline"
-                                        size="sm"
                                         onClick={() => handleQuestionClick(q)}
-                                        className="rounded-full h-auto py-1.5 px-3 text-sm"
+                                        className="rounded-full h-auto py-1 px-2.5 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-colors"
                                     >
                                         {q}
                                     </Button>
