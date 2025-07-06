@@ -22,7 +22,7 @@ export function AdditionalServices() {
                 width={400}
                 height={300}
                 className="rounded-lg object-cover mb-4 shadow-md"
-                data-ai-hint="car underbody"
+                data-ai-hint="rust proofing"
               />
               <h3 className="font-semibold mb-1">Днище и колесные арки</h3>
               <p className="text-sm text-muted-foreground">Мощный барьер против абразивного износа и коррозии. Наносим прочные составы, защищающие металл от камней, песка и влаги.</p>
@@ -34,7 +34,7 @@ export function AdditionalServices() {
                 width={400}
                 height={300}
                 className="rounded-lg object-cover mb-4 shadow-md"
-                data-ai-hint="car rust"
+                data-ai-hint="car cavity"
               />
               <h3 className="font-semibold mb-1">Скрытые полости</h3>
               <p className="text-sm text-muted-foreground">Обрабатываем пороги, двери и лонжероны специальными проникающими составами, которые останавливают ржавчину изнутри.</p>
@@ -46,7 +46,7 @@ export function AdditionalServices() {
                 width={400}
                 height={300}
                 className="rounded-lg object-cover mb-4 shadow-md"
-                data-ai-hint="car detailing suspension"
+                data-ai-hint="car suspension"
               />
               <h3 className="font-semibold mb-1">Подвеска и сварные швы</h3>
               <p className="text-sm text-muted-foreground">Уделяем внимание каждому элементу, защищая сварные соединения и детали подвески от преждевременного разрушения.</p>
