@@ -138,15 +138,13 @@ export function ChatWidget() {
   }, []);
 
   const handleChatMouseDown = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || !chatPosition) return;
     isChatDragging.current = true;
     document.body.style.cursor = 'grabbing';
-    if(chatPosition) {
-        chatDragOffset.current = {
-            x: e.clientX - chatPosition.x,
-            y: e.clientY - chatPosition.y,
-        };
-    }
+    chatDragOffset.current = {
+        x: e.clientX - chatPosition.x,
+        y: e.clientY - chatPosition.y,
+    };
   }, [chatPosition]);
 
   const handleGlobalMouseMove = useCallback((e: MouseEvent) => {
@@ -178,7 +176,7 @@ export function ChatWidget() {
         
         setChatPosition({ x: newX, y: newY });
     }
-  }, [chatPosition]);
+  }, [chatPosition, buttonPosition]);
 
   const handleGlobalMouseUp = useCallback(() => {
     if (isButtonDragging.current) {
@@ -214,7 +212,7 @@ export function ChatWidget() {
       window.removeEventListener('mousemove', handleGlobalMouseMove);
       window.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [handleGlobalMouseMove, handleGlobalMouseUp, buttonPosition]);
+  }, [handleGlobalMouseMove, handleGlobalMouseUp]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
