@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback } from './ui/avatar';
 
 const initialState = {
   status: 'idle' as const,
-  messages: [{ role: 'system', content: 'Здравствуйте! Чем могу помочь с вашим автомобилем?' }] as ChatMessage[],
+  messages: [] as ChatMessage[],
   error: undefined,
 };
 
@@ -285,24 +285,34 @@ export function ChatWidget() {
               </CardHeader>
               <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
                 <ScrollArea className="h-full px-4 pt-4">
-                   {state.messages.length <= 1 && (
-                      <div className="mb-6">
-                        <p className="text-sm text-muted-foreground mb-3">Возможные вопросы:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {predefinedQuestions.map((q, i) => (
-                             <Button
-                                key={i}
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleQuestionClick(q)}
-                                className="rounded-full h-auto py-1.5 px-3 text-sm"
-                              >
-                                {q}
-                              </Button>
-                          ))}
+                   {state.messages.length === 0 && (
+                      <>
+                        <div className="flex items-start gap-3 justify-start mb-6">
+                            <Avatar className="w-8 h-8 border border-primary/50">
+                                <AvatarFallback className="bg-primary text-primary-foreground"><Bot size={20}/></AvatarFallback>
+                            </Avatar>
+                            <div className={'rounded-xl px-4 py-2.5 max-w-[85%] text-sm break-words shadow-sm bg-muted rounded-bl-none'}>
+                                Здравствуйте! Чем могу помочь с вашим автомобилем?
+                            </div>
                         </div>
-                      </div>
+                        <div className="mb-6 ml-11">
+                            <p className="text-sm text-muted-foreground mb-3">Возможные вопросы:</p>
+                            <div className="flex flex-wrap gap-2">
+                            {predefinedQuestions.map((q, i) => (
+                                <Button
+                                    key={i}
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleQuestionClick(q)}
+                                    className="rounded-full h-auto py-1.5 px-3 text-sm"
+                                >
+                                    {q}
+                                </Button>
+                            ))}
+                            </div>
+                        </div>
+                      </>
                    )}
                    <MessageListContent messages={state.messages} />
                   <div ref={messagesEndRef} />
