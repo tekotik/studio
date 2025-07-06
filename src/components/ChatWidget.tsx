@@ -312,18 +312,22 @@ export function ChatWidget() {
                             <div className="w-8 h-8 flex-shrink-0" />
                             <div className="min-w-0 flex-1">
                                 <p className="text-sm text-muted-foreground mb-3">Возможные вопросы:</p>
-                                <div className="flex flex-wrap gap-2">
-                                {predefinedQuestions.map((q, i) => (
-                                    <Button
-                                        key={i}
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => handleQuestionClick(q)}
-                                        className="rounded-full h-auto py-1.5 px-3 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-colors whitespace-normal text-left"
-                                    >
-                                        {q}
-                                    </Button>
-                                ))}
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                {predefinedQuestions.map((q, i) => {
+                                    const buttonText = q.length > 35 ? q.substring(0, 32) + '...' : q;
+                                    return (
+                                        <Button
+                                            key={i}
+                                            type="button"
+                                            variant="outline"
+                                            title={q}
+                                            onClick={() => handleQuestionClick(q)}
+                                            className="rounded-full h-auto py-1.5 px-3 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-colors"
+                                        >
+                                            {buttonText}
+                                        </Button>
+                                    );
+                                })}
                                 </div>
                             </div>
                         </div>
