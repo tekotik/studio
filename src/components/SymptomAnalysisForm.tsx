@@ -163,7 +163,7 @@ export function SymptomAnalysisForm() {
           <div className="text-center mt-8 pt-6 border-t">
             <p className="mb-4 text-muted-foreground">Не уверены, что делать дальше? Получите оценку стоимости ремонта у проверенных специалистов.</p>
             <Button>
-              Отправить запрос на просчет ремонта
+              Рассчитать ремонт
             </Button>
           </div>
         </div>
