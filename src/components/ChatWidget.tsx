@@ -96,6 +96,7 @@ export function ChatWidget() {
   const [wasDragged, setWasDragged] = useState(false);
   
   const formRef = useRef<HTMLFormElement>(null);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
   const dragState = useRef({
     isDragging: false,
     element: null as 'button' | 'chat' | null,
@@ -109,6 +110,7 @@ export function ChatWidget() {
   const handleOpenChat = () => {
     if (wasDragged) return;
     setIsOpen(true);
+    setChatPosition(null); 
   };
 
   const handleCloseChat = () => {
@@ -117,11 +119,15 @@ export function ChatWidget() {
 
   useEffect(() => {
     if (isOpen && !chatPosition) {
-        const chatWidth = 380;
-        const chatHeight = 600;
-        const x = Math.max(0, (window.innerWidth - chatWidth) / 2);
-        const y = Math.max(0, (window.innerHeight - chatHeight) / 2);
-        setChatPosition({ x, y });
+        setTimeout(() => {
+            if (chatWindowRef.current) {
+                const chatWidth = chatWindowRef.current.offsetWidth;
+                const chatHeight = chatWindowRef.current.offsetHeight;
+                const x = Math.max(0, (window.innerWidth - chatWidth) / 2);
+                const y = Math.max(20, (window.innerHeight - chatHeight) / 2);
+                setChatPosition({ x, y });
+            }
+        }, 0);
     }
   }, [isOpen, chatPosition]);
 
@@ -175,12 +181,12 @@ export function ChatWidget() {
         setButtonPosition({ x: newX, y: newY });
     }
 
-    if (dragState.current.element === 'chat') {
+    if (dragState.current.element === 'chat' && chatWindowRef.current) {
         let newX = startPos.x + deltaX;
         let newY = startPos.y + deltaY;
         
-        const chatWidth = 380;
-        const chatHeight = 600;
+        const chatWidth = chatWindowRef.current.offsetWidth;
+        const chatHeight = chatWindowRef.current.offsetHeight;
         
         newX = Math.max(0, Math.min(newX, window.innerWidth - chatWidth));
         newY = Math.max(0, Math.min(newY, window.innerHeight - chatHeight));
@@ -254,14 +260,18 @@ export function ChatWidget() {
         <MessageSquare className="w-8 h-8 text-primary-foreground" />
       </button>
 
-      {isOpen && chatPosition && (
+      {isOpen && (
         <div
-            className="fixed z-50 w-[380px] max-w-[90vw] h-[600px] max-h-[85vh] flex flex-col rounded-2xl shadow-2xl bg-card"
-            style={{
+            ref={chatWindowRef}
+            className={cn(
+                "fixed z-50 w-[90vw] max-w-[380px] h-auto max-h-[85vh] md:max-h-[600px] flex flex-col rounded-2xl shadow-2xl bg-card",
+                !chatPosition && "opacity-0 pointer-events-none"
+            )}
+            style={chatPosition ? {
                 left: `${chatPosition.x}px`,
                 top: `${chatPosition.y}px`,
-                transition: dragState.current.isDragging ? 'none' : '',
-            }}
+                transition: dragState.current.isDragging ? 'none' : 'opacity 0.2s',
+            } : {}}
         >
            <Card className="w-full h-full flex flex-col shadow-none border-none overflow-hidden rounded-2xl">
             <form action={formAction} ref={formRef} className="flex flex-col flex-1 h-full">
@@ -269,7 +279,7 @@ export function ChatWidget() {
                 onMouseDown={(e) => handleMouseDown(e, 'chat')}
                 className={cn(
                   "flex flex-row items-center justify-between p-4 border-b",
-                  dragState.current.isDragging && dragState.current.element === 'chat' ? "cursor-grabbing" : "cursor-grab active:cursor-grabbing"
+                  "cursor-grab active:cursor-grabbing"
                 )}
               >
                  <div className="flex items-center gap-3">
