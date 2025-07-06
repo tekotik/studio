@@ -10,6 +10,7 @@ import { useFormState, useFormStatus } from 'react-dom';
 import { handleChatMessage, type ChatMessage } from '@/app/actions';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { Dialog, DialogContent } from './ui/dialog';
 
 const initialState = {
   status: 'idle' as const,
@@ -95,7 +96,7 @@ export function ChatWidget() {
   const [position, setPosition] = useState<{ x: number, y: number } | null>(null);
   const [wasDragged, setWasDragged] = useState(false);
   
-  const widgetRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const isDragging = useRef(false);
@@ -119,14 +120,14 @@ export function ChatWidget() {
   }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging.current && widgetRef.current) {
+    if (isDragging.current && buttonRef.current) {
       setWasDragged(true);
       
       let newX = e.clientX - dragOffset.current.x;
       let newY = e.clientY - dragOffset.current.y;
       
-      const widgetWidth = isOpen ? 380 : 64;
-      const widgetHeight = isOpen ? 600 : 64;
+      const widgetWidth = 64;
+      const widgetHeight = 64;
       const margin = 20;
       
       newX = Math.max(margin, Math.min(newX, window.innerWidth - widgetWidth - margin));
@@ -134,13 +135,13 @@ export function ChatWidget() {
 
       setPosition({ x: newX, y: newY });
     }
-  }, [isOpen]);
+  }, []);
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
-    if (e.button !== 0 || !widgetRef.current) return;
+    if (e.button !== 0 || !buttonRef.current) return;
     isDragging.current = true;
     document.body.style.cursor = 'grabbing';
-    const rect = widgetRef.current.getBoundingClientRect();
+    const rect = buttonRef.current.getBoundingClientRect();
     dragOffset.current = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -183,82 +184,76 @@ export function ChatWidget() {
   }
 
   return (
-    <div
-      ref={widgetRef}
-      className="fixed z-50"
-      style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        cursor: isDragging.current ? 'grabbing' : 'default',
-        width: isOpen ? '380px' : '64px',
-        height: isOpen ? '600px' : '64px',
-        transition: isDragging.current ? 'none' : 'width 0.3s, height 0.3s',
-      }}
-    >
-      <div className={cn("transition-all duration-300 origin-bottom-right w-full h-full", isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none")}>
-        <Card className="w-full h-full flex flex-col shadow-2xl border-primary/20 rounded-2xl">
-          <form action={formAction} ref={formRef} className="flex flex-col flex-1">
-            <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
-               <div className="flex items-center gap-3">
-                  <span className="p-2 bg-primary/10 rounded-full">
-                    <Sparkles className="text-primary w-6 h-6" />
-                  </span>
-                  <CardTitle className="text-lg font-semibold">Помощник POCHINI</CardTitle>
-               </div>
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8 rounded-full">
-                <X className="h-4 w-4" />
-              </Button>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
-              <ScrollArea className="h-full px-4 pt-4">
-                 {state.messages.length <= 1 && (
-                    <div className="mb-6">
-                      <p className="text-sm text-muted-foreground mb-3">Возможные вопросы:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {predefinedQuestions.map((q, i) => (
-                           <Button
-                              key={i}
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleQuestionClick(q)}
-                              className="rounded-full h-auto py-1.5 px-3 text-sm"
-                            >
-                              {q}
-                            </Button>
-                        ))}
-                      </div>
-                    </div>
-                 )}
-                 <MessageListContent messages={state.messages} />
-                <div ref={messagesEndRef} />
-              </ScrollArea>
-            </CardContent>
-            <CardFooter className="p-3 border-t bg-background/80">
-              <div className="relative w-full flex items-center">
-                 <Input name="message" placeholder="Напишите свой вопрос..." autoComplete='off' className="bg-muted focus-visible:ring-primary rounded-full pr-12 pl-4 h-12"/>
-                 <div className="absolute right-1 top-1/2 -translate-y-1/2">
-                   <ChatSubmitButton />
-                 </div>
-              </div>
-            </CardFooter>
-          </form>
-        </Card>
-      </div>
-
+    <>
       <button
+        ref={buttonRef}
         onMouseDown={handleMouseDown}
         onClick={() => { if (!wasDragged) setIsOpen(true); }}
         className={cn(
-          "bg-primary hover:bg-primary/90 rounded-none w-16 h-16 shadow-lg flex items-center justify-center absolute bottom-0 right-0",
+          "fixed z-50 bg-primary hover:bg-primary/90 rounded-none w-16 h-16 shadow-lg flex items-center justify-center",
           isOpen ? "opacity-0 scale-0 pointer-events-none" : "opacity-100 scale-100",
           isDragging.current ? "cursor-grabbing" : "cursor-grab",
           "transition-all duration-300"
         )}
-        style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          transition: isDragging.current ? 'none' : 'opacity 0.3s, transform 0.3s',
+          clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+        }}
       >
         <MessageSquare className="w-8 h-8 text-primary-foreground" />
       </button>
-    </div>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="w-[380px] max-w-[90vw] h-[600px] max-h-[85vh] p-0 flex flex-col rounded-2xl">
+           <Card className="w-full h-full flex flex-col shadow-none border-none">
+            <form action={formAction} ref={formRef} className="flex flex-col flex-1">
+              <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
+                 <div className="flex items-center gap-3">
+                    <span className="p-2 bg-primary/10 rounded-full">
+                      <Sparkles className="text-primary w-6 h-6" />
+                    </span>
+                    <CardTitle className="text-lg font-semibold">Помощник POCHINI</CardTitle>
+                 </div>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
+                <ScrollArea className="h-full px-4 pt-4">
+                   {state.messages.length <= 1 && (
+                      <div className="mb-6">
+                        <p className="text-sm text-muted-foreground mb-3">Возможные вопросы:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {predefinedQuestions.map((q, i) => (
+                             <Button
+                                key={i}
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleQuestionClick(q)}
+                                className="rounded-full h-auto py-1.5 px-3 text-sm"
+                              >
+                                {q}
+                              </Button>
+                          ))}
+                        </div>
+                      </div>
+                   )}
+                   <MessageListContent messages={state.messages} />
+                  <div ref={messagesEndRef} />
+                </ScrollArea>
+              </CardContent>
+              <CardFooter className="p-3 border-t bg-background/80">
+                <div className="relative w-full flex items-center">
+                   <Input name="message" placeholder="Напишите свой вопрос..." autoComplete='off' className="bg-muted focus-visible:ring-primary rounded-full pr-12 pl-4 h-12"/>
+                   <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                     <ChatSubmitButton />
+                   </div>
+                </div>
+              </CardFooter>
+            </form>
+          </Card>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
