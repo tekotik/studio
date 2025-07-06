@@ -319,7 +319,7 @@ export function ChatWidget() {
                                         type="button"
                                         variant="outline"
                                         onClick={() => handleQuestionClick(q)}
-                                        className="rounded-full h-auto py-1 px-2.5 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-colors"
+                                        className="rounded-full h-auto py-1.5 px-3 text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-colors whitespace-normal text-left"
                                     >
                                         {q}
                                     </Button>
