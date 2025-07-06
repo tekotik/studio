@@ -4,6 +4,7 @@ import { analyzeSymptoms, SymptomAnalysisInput, SymptomAnalysisOutput } from "@/
 import { generateMaintenanceSchedule, MaintenanceScheduleInput, MaintenanceScheduleOutput } from "@/ai/flows/maintenance-schedule";
 import { z } from "zod";
 import { chatWithAi, ChatInput, ChatOutput } from "@/ai/flows/chat";
+import { addNews } from "@/lib/news";
 
 const symptomSchema = z.object({
   make: z.string().min(2, "Пожалуйста, введите действительную марку."),
@@ -55,6 +56,14 @@ export async function handleSymptomAnalysis(
     if (!result || !result.diagnoses || result.diagnoses.length === 0) {
       return { status: "error", message: "ИИ не смог поставить диагноз. Пожалуйста, попробуйте быть более конкретным." };
     }
+
+    await addNews({
+      title: `Диагностика для ${validation.data.make} ${validation.data.model}`,
+      question: `Детали: ${analysisInput.vehicleDetails}. Симптомы: ${analysisInput.symptoms}`,
+      answer: JSON.stringify(result.diagnoses, null, 2),
+      source: 'Анализ симптомов'
+    });
+    
     return { status: "success", message: "Анализ завершен.", data: result };
   } catch (error) {
     console.error(error);
@@ -86,6 +95,14 @@ export async function handleMaintenanceSchedule(
     if (!result || !result.schedule) {
       return { status: "error", message: "ИИ не смог создать график. Пожалуйста, проверьте данные автомобиля." };
     }
+
+    await addNews({
+        title: `График ТО для ${validation.data.make} ${validation.data.model}`,
+        question: `Марка: ${validation.data.make}, Модель: ${validation.data.model}`,
+        answer: result.schedule,
+        source: 'Советник по ТО'
+    });
+
     return { status: "success", message: "График создан.", data: result };
   } catch (error) {
     console.error(error);
@@ -127,6 +144,14 @@ export async function handleChatMessage(
        const errorMessage: ChatMessage = { role: "system", content: "ИИ не смог ответить. Попробуйте перефразировать." };
        return { status: "error", messages: [...newMessages, errorMessage], error: "ИИ не смог ответить." };
     }
+
+    await addNews({
+        title: `Вопрос из чата: "${message.length > 40 ? message.substring(0, 40) + '...' : message}"`,
+        question: message,
+        answer: result.response,
+        source: 'Чат-ассистент'
+    });
+    
     const aiMessage: ChatMessage = { role: "model", content: result.response };
     return { status: "success", messages: [...newMessages, aiMessage] };
   } catch (error) {
