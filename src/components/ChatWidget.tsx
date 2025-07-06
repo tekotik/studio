@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from 'react';
+import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent, useCallback } from 'react';
 import { MessageSquare, X, Send, Bot, User, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
@@ -92,7 +92,7 @@ function MessageListContent({ messages }: { messages: ChatMessage[] }) {
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState<{ x: number, y: number } | null>(null);
   const [wasDragged, setWasDragged] = useState(false);
   
   const widgetRef = useRef<HTMLDivElement>(null);
@@ -110,6 +110,43 @@ export function ChatWidget() {
     formAction(formData);
   };
 
+  const handleMouseUp = useCallback(() => {
+    isDragging.current = false;
+    document.body.style.cursor = 'default';
+    setTimeout(() => {
+        setWasDragged(false);
+    }, 0);
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (isDragging.current && widgetRef.current) {
+      setWasDragged(true);
+      
+      let newX = e.clientX - dragOffset.current.x;
+      let newY = e.clientY - dragOffset.current.y;
+      
+      const widgetWidth = isOpen ? 380 : 64;
+      const widgetHeight = isOpen ? 600 : 64;
+      const margin = 20;
+      
+      newX = Math.max(margin, Math.min(newX, window.innerWidth - widgetWidth - margin));
+      newY = Math.max(margin, Math.min(newY, window.innerHeight - widgetHeight - margin));
+
+      setPosition({ x: newX, y: newY });
+    }
+  }, [isOpen]);
+
+  const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
+    if (e.button !== 0 || !widgetRef.current) return;
+    isDragging.current = true;
+    document.body.style.cursor = 'grabbing';
+    const rect = widgetRef.current.getBoundingClientRect();
+    dragOffset.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+  }, []);
+
   useEffect(() => {
     const setInitialPosition = () => {
       const margin = 20;
@@ -118,10 +155,21 @@ export function ChatWidget() {
         y: window.innerHeight - 64 - margin,
       });
     };
+    
     setInitialPosition();
-    window.addEventListener('resize', setInitialPosition);
-    return () => window.removeEventListener('resize', setInitialPosition);
-  }, []);
+
+    const handleResize = () => setInitialPosition();
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -130,53 +178,9 @@ export function ChatWidget() {
     }
   }, [state.messages, state.status]);
   
-  const handleMouseDown = (e: ReactMouseEvent<HTMLButtonElement>) => {
-    if (e.button !== 0) return;
-    isDragging.current = true;
-    if (widgetRef.current) {
-      const rect = widgetRef.current.getBoundingClientRect();
-      dragOffset.current = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      };
-    }
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging.current) {
-      setWasDragged(true);
-      if (widgetRef.current) {
-        let newX = e.clientX - dragOffset.current.x;
-        let newY = e.clientY - dragOffset.current.y;
-        
-        const widgetWidth = isOpen ? 380 : 64;
-        const widgetHeight = isOpen ? 600 : 64;
-        const margin = 20;
-        
-        newX = Math.max(margin, Math.min(newX, window.innerWidth - widgetWidth - margin));
-        newY = Math.max(margin, Math.min(newY, window.innerHeight - widgetHeight - margin));
-
-        setPosition({ x: newX, y: newY });
-      }
-    }
-  };
-
-  const handleMouseUp = () => {
-    isDragging.current = false;
-    setTimeout(() => {
-        setWasDragged(false);
-    }, 0);
-  };
-
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
-
+  if (!position) {
+    return null;
+  }
 
   return (
     <div
@@ -188,6 +192,7 @@ export function ChatWidget() {
         cursor: isDragging.current ? 'grabbing' : 'default',
         width: isOpen ? '380px' : '64px',
         height: isOpen ? '600px' : '64px',
+        transition: isDragging.current ? 'none' : 'width 0.3s, height 0.3s',
       }}
     >
       <div className={cn("transition-all duration-300 origin-bottom-right w-full h-full", isOpen ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none")}>
@@ -245,9 +250,10 @@ export function ChatWidget() {
         onMouseDown={handleMouseDown}
         onClick={() => { if (!wasDragged) setIsOpen(true); }}
         className={cn(
-          "bg-primary hover:bg-primary/90 rounded-none w-16 h-16 shadow-lg transition-all duration-300 flex items-center justify-center absolute bottom-0 right-0",
+          "bg-primary hover:bg-primary/90 rounded-none w-16 h-16 shadow-lg flex items-center justify-center absolute bottom-0 right-0",
           isOpen ? "opacity-0 scale-0 pointer-events-none" : "opacity-100 scale-100",
-          isDragging.current ? "cursor-grabbing" : "cursor-grab"
+          isDragging.current ? "cursor-grabbing" : "cursor-grab",
+          "transition-all duration-300"
         )}
         style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
       >
