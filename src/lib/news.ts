@@ -1,64 +1,53 @@
-'use server';
+import { db } from './firebase';
+import type { NewsArticle } from './types';
 
-import fs from 'fs/promises';
-import path from 'path';
-
-export interface NewsArticle {
-  id: string;
-  title: string;
-  question: string;
-  answer: string;
-  createdAt: string;
-  source: 'Анализ симптомов' | 'Советник по ТО' | 'Чат-ассистент';
-}
-
-const newsFilePath = path.join(process.cwd(), 'src', 'data', 'news.json');
-
-async function readNewsFile(): Promise<NewsArticle[]> {
-  try {
-    const fileContent = await fs.readFile(newsFilePath, 'utf-8');
-    const data = JSON.parse(fileContent);
-    if (!Array.isArray(data)) {
-        return [];
+// A helper function to safely access the db instance
+function getDb() {
+    if (!db) {
+        console.error("Firestore is not initialized. Check Firebase environment variables.");
+        throw new Error("Firestore not available");
     }
-    return data;
-  } catch (error) {
-    if (error instanceof Error && (error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return []; // File doesn't exist, which is fine on first run.
-    }
-    console.error('Failed to read news file:', error);
-    return [];
-  }
-}
-
-async function writeNewsFile(data: NewsArticle[]): Promise<void> {
-  try {
-    await fs.mkdir(path.dirname(newsFilePath), { recursive: true });
-    await fs.writeFile(newsFilePath, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Failed to write to news file:', error);
-  }
+    return db.collection('news');
 }
 
 export async function getNews(): Promise<NewsArticle[]> {
-  const newsItems = await readNewsFile();
-  // Sort by date, newest first
-  return newsItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  try {
+    const newsCollection = getDb();
+    const snapshot = await newsCollection.orderBy('createdAt', 'desc').limit(50).get();
+    if (snapshot.empty) {
+      // Чтобы продемонстрировать функциональность, можно вернуть стартовые данные, если коллекция пуста.
+      // В реальном приложении это можно убрать.
+      return [];
+    }
+    return snapshot.docs.map(doc => {
+        const data = doc.data();
+        // Firestore timestamps need to be converted to a serializable format (ISO string)
+        const createdAt = data.createdAt.toDate ? data.createdAt.toDate().toISOString() : new Date(data.createdAt._seconds * 1000).toISOString();
+        return {
+            id: doc.id,
+            title: data.title,
+            question: data.question,
+            answer: data.answer,
+            source: data.source,
+            createdAt,
+        } as NewsArticle;
+    });
+  } catch (error) {
+      console.error("Error fetching news from Firestore:", error);
+      // Return empty array on error to prevent page from crashing
+      return [];
+  }
 }
 
 export async function addNews(article: Omit<NewsArticle, 'id' | 'createdAt'>): Promise<void> {
-  const existingNews = await readNewsFile();
-  
-  const newArticle: NewsArticle = {
-    ...article,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-  };
-
-  const updatedNews = [newArticle, ...existingNews];
-  
-  // Limit the number of news items to prevent the file from growing indefinitely
-  const limitedNews = updatedNews.slice(0, 100);
-
-  await writeNewsFile(limitedNews);
+    try {
+        const newsCollection = getDb();
+        const newArticle = {
+            ...article,
+            createdAt: new Date(), // Firestore automatically converts this to a Timestamp
+        };
+        await newsCollection.add(newArticle);
+    } catch (error) {
+        console.error("Error adding news to Firestore:", error);
+    }
 }

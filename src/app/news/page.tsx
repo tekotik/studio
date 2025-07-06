@@ -1,5 +1,6 @@
 import { Header } from "@/components/Header";
-import { getNews, type NewsArticle } from "@/lib/news";
+import { getNews } from "@/lib/news";
+import type { NewsArticle } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
