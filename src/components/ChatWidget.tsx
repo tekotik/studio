@@ -100,6 +100,7 @@ export function ChatWidget() {
     isDragging: false,
     element: null as 'button' | 'chat' | null,
     offset: { x: 0, y: 0 },
+    startPos: { x: 0, y: 0 },
   });
 
   const [state, formAction] = useFormState(handleChatMessage, initialState);
@@ -132,6 +133,10 @@ export function ChatWidget() {
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLElement>, element: 'button' | 'chat') => {
     if (e.button !== 0) return;
+    
+    const targetElement = e.currentTarget;
+    const rect = targetElement.getBoundingClientRect();
+
     dragState.current = {
         isDragging: true,
         element,
@@ -139,23 +144,26 @@ export function ChatWidget() {
             x: e.clientX,
             y: e.clientY,
         },
+        startPos: element === 'button' && buttonPosition ? buttonPosition : chatPosition || { x: rect.left, y: rect.top },
     };
     document.body.style.cursor = 'grabbing';
     e.preventDefault();
-  }, []);
+  }, [buttonPosition, chatPosition]);
 
   const handleGlobalMouseMove = useCallback((e: MouseEvent) => {
     if (!dragState.current.isDragging) return;
     
-    setWasDragged(true);
+    if (!wasDragged) {
+      setWasDragged(true);
+    }
+
     const deltaX = e.clientX - dragState.current.offset.x;
     const deltaY = e.clientY - dragState.current.offset.y;
+    const startPos = dragState.current.startPos;
 
-    dragState.current.offset = { x: e.clientX, y: e.clientY };
-
-    if (dragState.current.element === 'button' && buttonPosition) {
-        let newX = buttonPosition.x + deltaX;
-        let newY = buttonPosition.y + deltaY;
+    if (dragState.current.element === 'button') {
+        let newX = startPos.x + deltaX;
+        let newY = startPos.y + deltaY;
         
         const widgetWidth = 64;
         const widgetHeight = 64;
@@ -167,9 +175,9 @@ export function ChatWidget() {
         setButtonPosition({ x: newX, y: newY });
     }
 
-    if (dragState.current.element === 'chat' && chatPosition) {
-        let newX = chatPosition.x + deltaX;
-        let newY = chatPosition.y + deltaY;
+    if (dragState.current.element === 'chat') {
+        let newX = startPos.x + deltaX;
+        let newY = startPos.y + deltaY;
         
         const chatWidth = 380;
         const chatHeight = 600;
@@ -179,7 +187,7 @@ export function ChatWidget() {
         
         setChatPosition({ x: newX, y: newY });
     }
-  }, [buttonPosition, chatPosition]);
+  }, [wasDragged]);
 
   const handleGlobalMouseUp = useCallback(() => {
     if (dragState.current.isDragging) {
@@ -231,7 +239,7 @@ export function ChatWidget() {
         onMouseDown={(e) => handleMouseDown(e, 'button')}
         onClick={handleOpenChat}
         className={cn(
-          "fixed z-40 bg-primary hover:bg-primary/90 rounded-full w-16 h-16 shadow-lg flex items-center justify-center animate-pulse",
+          "fixed z-40 bg-primary hover:bg-primary/90 rounded-full w-16 h-16 shadow-lg flex items-center justify-center animate-breathing-pulse",
           isOpen ? "opacity-0 scale-0 pointer-events-none" : "opacity-100 scale-100",
           dragState.current.isDragging && dragState.current.element === 'button' ? "cursor-grabbing" : "cursor-grab",
           "transition-all duration-300"
