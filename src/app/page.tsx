@@ -3,6 +3,7 @@ import { MaintenanceAdvisorForm } from "@/components/MaintenanceAdvisorForm";
 import { SymptomAnalysisForm } from "@/components/SymptomAnalysisForm";
 import { DiyGuides } from "@/components/DiyGuides";
 import { VisualAids } from "@/components/VisualAids";
+import { AdditionalServices } from "@/components/AdditionalServices";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Car, Wrench } from "lucide-react";
 
@@ -41,6 +42,7 @@ export default function Home() {
 
         <VisualAids />
         <DiyGuides />
+        <AdditionalServices />
 
       </main>
       <footer className="py-6 text-center text-muted-foreground">
