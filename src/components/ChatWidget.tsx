@@ -95,14 +95,12 @@ export function ChatWidget() {
   const [chatPosition, setChatPosition] = useState<{ x: number, y: number } | null>(null);
   const [wasDragged, setWasDragged] = useState(false);
   
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  const isButtonDragging = useRef(false);
-  const buttonDragOffset = useRef({ x: 0, y: 0 });
-
-  const isChatDragging = useRef(false);
-  const chatDragOffset = useRef({ x: 0, y: 0 });
+  const dragState = useRef({
+    isDragging: false,
+    element: null as 'button' | 'chat' | null,
+    offset: { x: 0, y: 0 },
+  });
 
   const [state, formAction] = useFormState(handleChatMessage, initialState);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -110,15 +108,21 @@ export function ChatWidget() {
   const handleOpenChat = () => {
     if (wasDragged) return;
     setIsOpen(true);
-    if (!chatPosition) {
-      const chatWidth = 380;
-      const chatHeight = 600;
-      setChatPosition({
-        x: (window.innerWidth - chatWidth) / 2,
-        y: (window.innerHeight - chatHeight) / 2,
-      });
-    }
   };
+
+  const handleCloseChat = () => {
+    setIsOpen(false);
+  }
+
+  useEffect(() => {
+    if (isOpen && !chatPosition) {
+        const chatWidth = 380;
+        const chatHeight = 600;
+        const x = Math.max(0, (window.innerWidth - chatWidth) / 2);
+        const y = Math.max(0, (window.innerHeight - chatHeight) / 2);
+        setChatPosition({ x, y });
+    }
+  }, [isOpen, chatPosition]);
 
   const handleQuestionClick = (question: string) => {
     const formData = new FormData();
@@ -126,47 +130,46 @@ export function ChatWidget() {
     formAction(formData);
   };
 
-  const handleButtonMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
-    if (e.button !== 0 || !buttonRef.current) return;
-    isButtonDragging.current = true;
-    document.body.style.cursor = 'grabbing';
-    const rect = buttonRef.current.getBoundingClientRect();
-    buttonDragOffset.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+  const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLElement>, element: 'button' | 'chat') => {
+    if (e.button !== 0) return;
+    dragState.current = {
+        isDragging: true,
+        element,
+        offset: {
+            x: e.clientX,
+            y: e.clientY,
+        },
     };
+    document.body.style.cursor = 'grabbing';
+    e.preventDefault();
   }, []);
 
-  const handleChatMouseDown = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0 || !chatPosition) return;
-    isChatDragging.current = true;
-    document.body.style.cursor = 'grabbing';
-    chatDragOffset.current = {
-        x: e.clientX - chatPosition.x,
-        y: e.clientY - chatPosition.y,
-    };
-  }, [chatPosition]);
-
   const handleGlobalMouseMove = useCallback((e: MouseEvent) => {
-    if (isButtonDragging.current && buttonRef.current) {
-      setWasDragged(true);
-      
-      let newX = e.clientX - buttonDragOffset.current.x;
-      let newY = e.clientY - buttonDragOffset.current.y;
-      
-      const widgetWidth = 64;
-      const widgetHeight = 64;
-      const margin = 20;
-      
-      newX = Math.max(margin, Math.min(newX, window.innerWidth - widgetWidth - margin));
-      newY = Math.max(margin, Math.min(newY, window.innerHeight - widgetHeight - margin));
+    if (!dragState.current.isDragging) return;
+    
+    setWasDragged(true);
+    const deltaX = e.clientX - dragState.current.offset.x;
+    const deltaY = e.clientY - dragState.current.offset.y;
 
-      setButtonPosition({ x: newX, y: newY });
+    dragState.current.offset = { x: e.clientX, y: e.clientY };
+
+    if (dragState.current.element === 'button' && buttonPosition) {
+        let newX = buttonPosition.x + deltaX;
+        let newY = buttonPosition.y + deltaY;
+        
+        const widgetWidth = 64;
+        const widgetHeight = 64;
+        const margin = 20;
+        
+        newX = Math.max(margin, Math.min(newX, window.innerWidth - widgetWidth - margin));
+        newY = Math.max(margin, Math.min(newY, window.innerHeight - widgetHeight - margin));
+
+        setButtonPosition({ x: newX, y: newY });
     }
 
-    if (isChatDragging.current && chatPosition) {
-        let newX = e.clientX - chatDragOffset.current.x;
-        let newY = e.clientY - chatDragOffset.current.y;
+    if (dragState.current.element === 'chat' && chatPosition) {
+        let newX = chatPosition.x + deltaX;
+        let newY = chatPosition.y + deltaY;
         
         const chatWidth = 380;
         const chatHeight = 600;
@@ -176,22 +179,19 @@ export function ChatWidget() {
         
         setChatPosition({ x: newX, y: newY });
     }
-  }, [chatPosition, buttonPosition]);
+  }, [buttonPosition, chatPosition]);
 
   const handleGlobalMouseUp = useCallback(() => {
-    if (isButtonDragging.current) {
-        isButtonDragging.current = false;
+    if (dragState.current.isDragging) {
+        dragState.current.isDragging = false;
+        dragState.current.element = null;
         document.body.style.cursor = 'default';
         setTimeout(() => {
             setWasDragged(false);
         }, 0);
     }
-    if (isChatDragging.current) {
-        isChatDragging.current = false;
-        document.body.style.cursor = 'default';
-    }
   }, []);
-
+  
   useEffect(() => {
     const setInitialPosition = () => {
       if (!buttonPosition) {
@@ -212,7 +212,7 @@ export function ChatWidget() {
       window.removeEventListener('mousemove', handleGlobalMouseMove);
       window.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [handleGlobalMouseMove, handleGlobalMouseUp]);
+  }, [handleGlobalMouseMove, handleGlobalMouseUp, buttonPosition]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -228,22 +228,20 @@ export function ChatWidget() {
   return (
     <>
       <button
-        ref={buttonRef}
-        onMouseDown={handleButtonMouseDown}
+        onMouseDown={(e) => handleMouseDown(e, 'button')}
         onClick={handleOpenChat}
         className={cn(
-          "fixed z-40 bg-primary hover:bg-primary/90 rounded-none w-16 h-16 shadow-lg flex items-center justify-center",
+          "fixed z-40 bg-primary hover:bg-primary/90 rounded-full w-16 h-16 shadow-lg flex items-center justify-center animate-pulse",
           isOpen ? "opacity-0 scale-0 pointer-events-none" : "opacity-100 scale-100",
-          isButtonDragging.current ? "cursor-grabbing" : "cursor-grab",
+          dragState.current.isDragging && dragState.current.element === 'button' ? "cursor-grabbing" : "cursor-grab",
           "transition-all duration-300"
         )}
         style={{
           left: `${buttonPosition.x}px`,
           top: `${buttonPosition.y}px`,
-          transition: isButtonDragging.current ? 'none' : 'opacity 0.3s, transform 0.3s',
-          clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
+          transition: dragState.current.isDragging ? 'none' : 'opacity 0.3s, transform 0.3s',
         }}
-        aria-label="Open Chat"
+        aria-label="Открыть чат"
       >
         <MessageSquare className="w-8 h-8 text-primary-foreground" />
       </button>
@@ -254,14 +252,17 @@ export function ChatWidget() {
             style={{
                 left: `${chatPosition.x}px`,
                 top: `${chatPosition.y}px`,
-                transition: isChatDragging.current ? 'none' : '',
+                transition: dragState.current.isDragging ? 'none' : '',
             }}
         >
            <Card className="w-full h-full flex flex-col shadow-none border-none overflow-hidden rounded-2xl">
             <form action={formAction} ref={formRef} className="flex flex-col flex-1 h-full">
               <CardHeader
-                onMouseDown={handleChatMouseDown}
-                className="flex flex-row items-center justify-between p-4 border-b cursor-grab active:cursor-grabbing"
+                onMouseDown={(e) => handleMouseDown(e, 'chat')}
+                className={cn(
+                  "flex flex-row items-center justify-between p-4 border-b",
+                  dragState.current.isDragging && dragState.current.element === 'chat' ? "cursor-grabbing" : "cursor-grab active:cursor-grabbing"
+                )}
               >
                  <div className="flex items-center gap-3">
                     <span className="p-2 bg-primary/10 rounded-full">
@@ -269,7 +270,7 @@ export function ChatWidget() {
                     </span>
                     <CardTitle className="text-lg font-semibold">Помощник POCHINI</CardTitle>
                  </div>
-                 <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => setIsOpen(false)}>
+                 <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleCloseChat}>
                     <X className="h-4 w-4" />
                     <span className="sr-only">Закрыть чат</span>
                  </Button>
