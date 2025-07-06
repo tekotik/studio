@@ -10,7 +10,6 @@ import { useFormState, useFormStatus } from 'react-dom';
 import { handleChatMessage, type ChatMessage } from '@/app/actions';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback } from './ui/avatar';
-import { Dialog, DialogContent } from './ui/dialog';
 
 const initialState = {
   status: 'idle' as const,
@@ -90,20 +89,36 @@ function MessageListContent({ messages }: { messages: ChatMessage[] }) {
   );
 }
 
-
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState<{ x: number, y: number } | null>(null);
+  const [buttonPosition, setButtonPosition] = useState<{ x: number, y: number } | null>(null);
+  const [chatPosition, setChatPosition] = useState<{ x: number, y: number } | null>(null);
   const [wasDragged, setWasDragged] = useState(false);
   
   const buttonRef = useRef<HTMLButtonElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const isDragging = useRef(false);
-  const dragOffset = useRef({ x: 0, y: 0 });
+  const isButtonDragging = useRef(false);
+  const buttonDragOffset = useRef({ x: 0, y: 0 });
+
+  const isChatDragging = useRef(false);
+  const chatDragOffset = useRef({ x: 0, y: 0 });
 
   const [state, formAction] = useFormState(handleChatMessage, initialState);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const handleOpenChat = () => {
+    if (wasDragged) return;
+    setIsOpen(true);
+    if (!chatPosition) {
+      const chatWidth = 380;
+      const chatHeight = 600;
+      setChatPosition({
+        x: (window.innerWidth - chatWidth) / 2,
+        y: (window.innerHeight - chatHeight) / 2,
+      });
+    }
+  };
 
   const handleQuestionClick = (question: string) => {
     const formData = new FormData();
@@ -111,20 +126,35 @@ export function ChatWidget() {
     formAction(formData);
   };
 
-  const handleMouseUp = useCallback(() => {
-    isDragging.current = false;
-    document.body.style.cursor = 'default';
-    setTimeout(() => {
-        setWasDragged(false);
-    }, 0);
+  const handleButtonMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
+    if (e.button !== 0 || !buttonRef.current) return;
+    isButtonDragging.current = true;
+    document.body.style.cursor = 'grabbing';
+    const rect = buttonRef.current.getBoundingClientRect();
+    buttonDragOffset.current = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (isDragging.current && buttonRef.current) {
+  const handleChatMouseDown = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    isChatDragging.current = true;
+    document.body.style.cursor = 'grabbing';
+    if(chatPosition) {
+        chatDragOffset.current = {
+            x: e.clientX - chatPosition.x,
+            y: e.clientY - chatPosition.y,
+        };
+    }
+  }, [chatPosition]);
+
+  const handleGlobalMouseMove = useCallback((e: MouseEvent) => {
+    if (isButtonDragging.current && buttonRef.current) {
       setWasDragged(true);
       
-      let newX = e.clientX - dragOffset.current.x;
-      let newY = e.clientY - dragOffset.current.y;
+      let newX = e.clientX - buttonDragOffset.current.x;
+      let newY = e.clientY - buttonDragOffset.current.y;
       
       const widgetWidth = 64;
       const widgetHeight = 64;
@@ -133,44 +163,58 @@ export function ChatWidget() {
       newX = Math.max(margin, Math.min(newX, window.innerWidth - widgetWidth - margin));
       newY = Math.max(margin, Math.min(newY, window.innerHeight - widgetHeight - margin));
 
-      setPosition({ x: newX, y: newY });
+      setButtonPosition({ x: newX, y: newY });
     }
-  }, []);
 
-  const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
-    if (e.button !== 0 || !buttonRef.current) return;
-    isDragging.current = true;
-    document.body.style.cursor = 'grabbing';
-    const rect = buttonRef.current.getBoundingClientRect();
-    dragOffset.current = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
+    if (isChatDragging.current && chatPosition) {
+        let newX = e.clientX - chatDragOffset.current.x;
+        let newY = e.clientY - chatDragOffset.current.y;
+        
+        const chatWidth = 380;
+        const chatHeight = 600;
+        
+        newX = Math.max(0, Math.min(newX, window.innerWidth - chatWidth));
+        newY = Math.max(0, Math.min(newY, window.innerHeight - chatHeight));
+        
+        setChatPosition({ x: newX, y: newY });
+    }
+  }, [chatPosition]);
+
+  const handleGlobalMouseUp = useCallback(() => {
+    if (isButtonDragging.current) {
+        isButtonDragging.current = false;
+        document.body.style.cursor = 'default';
+        setTimeout(() => {
+            setWasDragged(false);
+        }, 0);
+    }
+    if (isChatDragging.current) {
+        isChatDragging.current = false;
+        document.body.style.cursor = 'default';
+    }
   }, []);
 
   useEffect(() => {
     const setInitialPosition = () => {
-      const margin = 20;
-      setPosition({
-        x: window.innerWidth - 64 - margin, 
-        y: window.innerHeight - 64 - margin,
-      });
+      if (!buttonPosition) {
+        const margin = 20;
+        setButtonPosition({
+          x: window.innerWidth - 64 - margin, 
+          y: window.innerHeight - 64 - margin,
+        });
+      }
     };
     
     setInitialPosition();
 
-    const handleResize = () => setInitialPosition();
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+    window.addEventListener('mouseup', handleGlobalMouseUp);
     
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [handleMouseMove, handleMouseUp]);
+  }, [handleGlobalMouseMove, handleGlobalMouseUp, buttonPosition]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -179,7 +223,7 @@ export function ChatWidget() {
     }
   }, [state.messages, state.status]);
   
-  if (!position) {
+  if (!buttonPosition) {
     return null;
   }
 
@@ -187,35 +231,50 @@ export function ChatWidget() {
     <>
       <button
         ref={buttonRef}
-        onMouseDown={handleMouseDown}
-        onClick={() => { if (!wasDragged) setIsOpen(true); }}
+        onMouseDown={handleButtonMouseDown}
+        onClick={handleOpenChat}
         className={cn(
-          "fixed z-50 bg-primary hover:bg-primary/90 rounded-none w-16 h-16 shadow-lg flex items-center justify-center",
+          "fixed z-40 bg-primary hover:bg-primary/90 rounded-none w-16 h-16 shadow-lg flex items-center justify-center",
           isOpen ? "opacity-0 scale-0 pointer-events-none" : "opacity-100 scale-100",
-          isDragging.current ? "cursor-grabbing" : "cursor-grab",
+          isButtonDragging.current ? "cursor-grabbing" : "cursor-grab",
           "transition-all duration-300"
         )}
         style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          transition: isDragging.current ? 'none' : 'opacity 0.3s, transform 0.3s',
+          left: `${buttonPosition.x}px`,
+          top: `${buttonPosition.y}px`,
+          transition: isButtonDragging.current ? 'none' : 'opacity 0.3s, transform 0.3s',
           clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
         }}
+        aria-label="Open Chat"
       >
         <MessageSquare className="w-8 h-8 text-primary-foreground" />
       </button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="w-[380px] max-w-[90vw] h-[600px] max-h-[85vh] p-0 flex flex-col rounded-2xl">
-           <Card className="w-full h-full flex flex-col shadow-none border-none">
-            <form action={formAction} ref={formRef} className="flex flex-col flex-1">
-              <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
+      {isOpen && chatPosition && (
+        <div
+            className="fixed z-50 w-[380px] max-w-[90vw] h-[600px] max-h-[85vh] flex flex-col rounded-2xl shadow-2xl bg-card"
+            style={{
+                left: `${chatPosition.x}px`,
+                top: `${chatPosition.y}px`,
+                transition: isChatDragging.current ? 'none' : '',
+            }}
+        >
+           <Card className="w-full h-full flex flex-col shadow-none border-none overflow-hidden rounded-2xl">
+            <form action={formAction} ref={formRef} className="flex flex-col flex-1 h-full">
+              <CardHeader
+                onMouseDown={handleChatMouseDown}
+                className="flex flex-row items-center justify-between p-4 border-b cursor-grab active:cursor-grabbing"
+              >
                  <div className="flex items-center gap-3">
                     <span className="p-2 bg-primary/10 rounded-full">
                       <Sparkles className="text-primary w-6 h-6" />
                     </span>
                     <CardTitle className="text-lg font-semibold">Помощник POCHINI</CardTitle>
                  </div>
+                 <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => setIsOpen(false)}>
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Закрыть чат</span>
+                 </Button>
               </CardHeader>
               <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
                 <ScrollArea className="h-full px-4 pt-4">
@@ -252,8 +311,8 @@ export function ChatWidget() {
               </CardFooter>
             </form>
           </Card>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </>
   );
 }
