@@ -53,13 +53,13 @@ function MessageListContent({ messages }: { messages: ChatMessage[] }) {
           )}
         >
           {msg.role === 'model' && (
-            <Avatar className="w-8 h-8 border border-primary/50">
+            <Avatar className="w-8 h-8 border border-primary/50 flex-shrink-0">
               <AvatarFallback className="bg-primary text-primary-foreground"><Bot size={20}/></AvatarFallback>
             </Avatar>
           )}
           <div
             className={cn(
-              'rounded-xl px-4 py-2.5 max-w-[85%] text-sm break-words shadow-sm',
+              'rounded-xl px-4 py-2.5 max-w-[85%] text-sm break-words shadow-sm min-w-0',
               msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-muted rounded-bl-none',
               msg.role === 'system' && 'w-full text-center bg-transparent text-muted-foreground text-xs italic shadow-none'
             )}
@@ -67,7 +67,7 @@ function MessageListContent({ messages }: { messages: ChatMessage[] }) {
             {msg.content}
           </div>
            {msg.role === 'user' && (
-            <Avatar className="w-8 h-8 border">
+            <Avatar className="w-8 h-8 border flex-shrink-0">
               <AvatarFallback><User size={20}/></AvatarFallback>
             </Avatar>
           )}
@@ -296,33 +296,36 @@ export function ChatWidget() {
               <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
                 <ScrollArea className="h-full px-4 pt-4">
                    {state.messages.length === 0 && (
-                      <>
-                        <div className="flex items-start gap-3 justify-start mb-6">
-                            <Avatar className="w-8 h-8 border border-primary/50">
+                      <div className="space-y-6 pb-4">
+                        <div className="flex items-start gap-3 justify-start">
+                            <Avatar className="w-8 h-8 border border-primary/50 flex-shrink-0">
                                 <AvatarFallback className="bg-primary text-primary-foreground"><Bot size={20}/></AvatarFallback>
                             </Avatar>
-                            <div className={'rounded-xl px-4 py-2.5 max-w-[85%] text-sm break-words shadow-sm bg-muted rounded-bl-none'}>
+                            <div className={'rounded-xl px-4 py-2.5 max-w-[85%] text-sm break-words shadow-sm bg-muted rounded-bl-none min-w-0'}>
                                 Здравствуйте! Чем могу помочь с вашим автомобилем?
                             </div>
                         </div>
-                        <div className="mb-6 ml-11">
-                            <p className="text-sm text-muted-foreground mb-3">Возможные вопросы:</p>
-                            <div className="flex flex-wrap gap-2">
-                            {predefinedQuestions.map((q, i) => (
-                                <Button
-                                    key={i}
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleQuestionClick(q)}
-                                    className="rounded-full h-auto py-1.5 px-3 text-sm"
-                                >
-                                    {q}
-                                </Button>
-                            ))}
+                        <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm text-muted-foreground mb-3">Возможные вопросы:</p>
+                                <div className="flex flex-wrap gap-2">
+                                {predefinedQuestions.map((q, i) => (
+                                    <Button
+                                        key={i}
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleQuestionClick(q)}
+                                        className="rounded-full h-auto py-1.5 px-3 text-sm"
+                                    >
+                                        {q}
+                                    </Button>
+                                ))}
+                                </div>
                             </div>
                         </div>
-                      </>
+                      </div>
                    )}
                    <MessageListContent messages={state.messages} />
                   <div ref={messagesEndRef} />
