@@ -3,6 +3,7 @@
 import { analyzeSymptoms, SymptomAnalysisInput, SymptomAnalysisOutput } from "@/ai/flows/symptom-analysis";
 import { generateMaintenanceSchedule, MaintenanceScheduleInput, MaintenanceScheduleOutput } from "@/ai/flows/maintenance-schedule";
 import { z } from "zod";
+import { chatWithAi, ChatInput, ChatOutput } from "@/ai/flows/chat";
 
 const symptomSchema = z.object({
   make: z.string().min(2, "Пожалуйста, введите действительную марку."),
@@ -89,5 +90,48 @@ export async function handleMaintenanceSchedule(
   } catch (error) {
     console.error(error);
     return { status: "error", message: "Произошла непредвиденная ошибка. Пожалуйста, попробуйте еще раз." };
+  }
+}
+
+export type ChatMessage = {
+  role: "user" | "model" | "system";
+  content: string;
+};
+
+type ChatState = {
+  status: "idle" | "loading" | "success" | "error";
+  messages: ChatMessage[];
+  error?: string;
+};
+
+export async function handleChatMessage(
+  prevState: ChatState,
+  formData: FormData
+): Promise<ChatState> {
+  const message = formData.get("message") as string;
+  if (!message || message.trim().length === 0) {
+    return prevState;
+  }
+
+  const userMessage: ChatMessage = { role: "user", content: message };
+  const newMessages: ChatMessage[] = [...prevState.messages, userMessage];
+
+  const chatInput: ChatInput = {
+    message: message,
+    history: prevState.messages.filter(m => m.role !== 'system').map(m => ({role: m.role, content: m.content})),
+  };
+
+  try {
+    const result = await chatWithAi(chatInput);
+    if (!result || !result.response) {
+       const errorMessage: ChatMessage = { role: "system", content: "ИИ не смог ответить. Попробуйте перефразировать." };
+       return { status: "error", messages: [...newMessages, errorMessage], error: "ИИ не смог ответить." };
+    }
+    const aiMessage: ChatMessage = { role: "model", content: result.response };
+    return { status: "success", messages: [...newMessages, aiMessage] };
+  } catch (error) {
+    console.error(error);
+    const errorMessage: ChatMessage = { role: "system", content: "Произошла ошибка. Пожалуйста, попробуйте еще раз." };
+    return { status: "error", messages: [...newMessages, errorMessage], error: "Произошла непредвиденная ошибка." };
   }
 }
