@@ -57,7 +57,7 @@ function MessageListContent({ messages }: { messages: ChatMessage[] }) {
               <AvatarFallback className="bg-primary text-primary-foreground"><Bot size={20}/></AvatarFallback>
             </Avatar>
           )}
-          <div
+           <div
             className={cn(
               'rounded-xl px-4 py-2.5 max-w-[85%] text-sm break-words shadow-sm min-w-0',
               msg.role === 'user' ? 'bg-primary text-primary-foreground rounded-br-none' : 'bg-muted rounded-bl-none',
@@ -138,7 +138,7 @@ export function ChatWidget() {
   };
 
   const handleMouseDown = useCallback((e: ReactMouseEvent<HTMLElement>, element: 'button' | 'chat') => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || (e.target as HTMLElement).closest('button')) return;
     
     const targetElement = e.currentTarget;
     const rect = targetElement.getBoundingClientRect();

@@ -38,27 +38,7 @@ const AnswerContent = ({ article }: { article: NewsArticle }) => {
   }
 
   if (article.source === 'Советник по ТО') {
-    const formattedSchedule = article.answer
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
-    
-    return (
-       <div className="space-y-2 rounded-md text-sm">
-        {formattedSchedule.map((line, index) => {
-          if (line.startsWith('### ')) {
-            return <h3 key={index} className="font-bold text-base text-primary mt-3 mb-1">{line.replace('### ', '')}</h3>;
-          }
-          if (line.startsWith('**') && line.endsWith('**')) {
-              return <h4 key={index} className="font-semibold mt-2">{line.replace(/\*\*/g, '')}</h4>;
-          }
-          if (line.startsWith('* ')) {
-              return <p key={index} className="flex items-start gap-2 pl-2"><span className="text-primary font-semibold">✓</span><span>{line.substring(2)}</span></p>;
-          }
-          return <p key={index} className="pl-2">{line}</p>;
-        })}
-      </div>
-    )
+    return <pre className="whitespace-pre-wrap font-mono text-sm bg-muted/50 p-3 rounded-md">{article.answer}</pre>;
   }
 
   return <p className="whitespace-pre-wrap">{article.answer}</p>;
